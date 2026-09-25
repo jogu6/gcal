@@ -1,18 +1,19 @@
-const CACHE='gcal-test-ffc24b5bf27d9c3a';
+const CACHE='gcal-test-bf02c2424270b558';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","assets/member-cQ7uReCn.js","assets/announcement-manager-CTtj8Wln.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-DCT2lKLY.js","assets/event-dialog-CP9SbVy4.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-Dnw5gm90.js","assets/main-Dlr8l2oJ.js","assets/push-6D_rQ8MK.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-k-MA_8VM.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-Um-Jk1RG.css","assets/member-BkP-G1GL.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","assets/member-BwxJXSke.js","assets/announcement-manager-CJox2ybG.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-DF2adFei.js","assets/event-dialog-tG8joE9O.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-SC_38-6E.js","assets/main-IP-bmxQu.js","assets/push-WAY88rhu.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-k-MA_8VM.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-Um-Jk1RG.css","assets/member-BkP-G1GL.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET'||!FILES.includes(event.request.url))return;
   event.respondWith(caches.open(CACHE).then(cache=>cache.match(event.request).then(cached=>cached||fetch(event.request))));
 });
+const validRoomId=id=>typeof id==='string'&&(/^[a-f0-9-]{36}$/.test(id)||/^system:members:(?:all|game:[a-f0-9-]{36}:(?:playing|unplayed))$/.test(id));
 self.addEventListener('push',event=>{
   event.waitUntil((async()=>{
     let data;try{data=event.data?.json();}catch{return;}
     if(!data||!['alarm','event-change','event-response','test','chat','board'].includes(data.kind)||!Number.isFinite(data.expiresMs)||data.expiresMs<=Date.now())return;
     const eventId=typeof data.eventId==='string'&&/^[a-f0-9-]{36}$/.test(data.eventId)?data.eventId:null;
-    const roomId=['chat','board'].includes(data.kind)&&typeof data.roomId==='string'&&/^[a-f0-9-]{36}$/.test(data.roomId)?data.roomId:null;
+    const roomId=['chat','board'].includes(data.kind)&&validRoomId(data.roomId)?data.roomId:null;
     const postId=roomId&&typeof data.postId==='string'&&/^[a-f0-9-]{36}$/.test(data.postId)?data.postId:null;
     const roomTitle=typeof data.roomTitle==='string'&&data.roomTitle.trim()?data.roomTitle.trim().slice(0,100):data.kind==='chat'?'チャット':'掲示板';
     const postText=typeof data.postText==='string'&&data.postText.trim()?data.postText.trim().slice(0,120):'新しい投稿があります';
@@ -27,7 +28,7 @@ self.addEventListener('push',event=>{
 self.addEventListener('notificationclick',event=>{
   event.notification.close();event.waitUntil((async()=>{
     const url=new URL(self.registration.scope),id=event.notification.data?.eventId;if(typeof id==='string'&&/^[a-f0-9-]{36}$/.test(id))url.hash='alarm='+id;
-    const roomId=event.notification.data?.roomId,roomKind=event.notification.data?.roomKind==='board'?'board':'chat',postId=event.notification.data?.postId;if(typeof roomId==='string'&&/^[a-f0-9-]{36}$/.test(roomId))url.hash=roomKind+'='+roomId+(typeof postId==='string'&&/^[a-f0-9-]{36}$/.test(postId)?'&post='+postId:'');
+    const roomId=event.notification.data?.roomId,roomKind=event.notification.data?.roomKind==='board'?'board':'chat',postId=event.notification.data?.postId;if(validRoomId(roomId))url.hash=roomKind+'='+roomId+(typeof postId==='string'&&/^[a-f0-9-]{36}$/.test(postId)?'&post='+postId:'');
     const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     const target=windows.find(client=>client.url===url.href)||windows.find(client=>client.url.startsWith(self.registration.scope));
     if(target){
