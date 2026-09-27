@@ -1,6 +1,6 @@
-const CACHE='gcal-test-2cbadb994cd70ce8';
+const CACHE='gcal-test-58d47a9fd0381f29';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","assets/member-CDfLUgCO.js","assets/announcement-manager-jTmSulDV.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-C9gRSFIn.js","assets/event-dialog-D97PRbMK.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-buhCO-eu.js","assets/main-CybRwBrE.js","assets/push-Di_6RRZY.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-DSSJpEng.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-jQ90UkHl.css","assets/member-DiKn5a_5.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","assets/member-CfTom3lK.js","assets/announcement-manager-DPz2oCm0.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-BNe3XZtu.js","assets/event-dialog-BmDZ_z0i.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-BgFmPD1q.js","assets/main-CzCHT8kP.js","assets/push-BZDlJsu3.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-DSSJpEng.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-jQ90UkHl.css","assets/member-Du-xDgE5.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
@@ -22,7 +22,7 @@ self.addEventListener('push',event=>{
     const dateText=(typeof data.dateText==='string'&&/^\d{4}\/\d{2}\/\d{2}(?: \d{2}:\d{2})?$/.test(data.dateText))||data.dateText==='日時未指定'?data.dateText:'日時未指定';
     const reason=data.kind==='alarm'?'開催時刻が近づいています':data.kind==='event-response'?'参加表明が変更されました':'内容が変更されました';
     const body=data.kind==='test'?'通知のテストです。':data.kind==='chat'||data.kind==='board'?`「${roomTitle}」：${postText}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
-    await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:false,data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat'}});
+    await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat'}});
   })());
 });
 self.addEventListener('notificationclick',event=>{
