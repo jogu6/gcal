@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" role="img" aria-labelledby="title">
+<title id="title">SmartScreen警告画面の例：詳細情報を選択</title>
+<rect x="1" y="1" width="678" height="418" rx="12" fill="#403f3c" stroke="#777"/>
+<g fill="white" font-family="sans-serif"><text x="26" y="54" font-size="28">Windows によって PC が保護されました</text>
+<text x="26" y="105" font-size="17">Microsoft Defender SmartScreen は認識されないアプリの</text><text x="26" y="132" font-size="17">起動を停止しました。</text>
+<text x="32" y="191" font-size="21" text-decoration="underline">詳細情報</text></g>
+<rect x="20" y="159" width="119" height="47" rx="5" fill="none" stroke="#ffd66b" stroke-width="4"/>
+<path d="M225 183H155m15-12-15 12 15 12" fill="none" stroke="#ffd66b" stroke-width="4"/>
+<text x="238" y="190" fill="#ffd66b" font-family="sans-serif" font-size="20">① ここを選択</text>
+<rect x="497" y="348" width="150" height="44" fill="white"/><text x="519" y="378" fill="black" font-family="sans-serif" font-size="20">実行しない</text>
+</svg>
