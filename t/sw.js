@@ -1,13 +1,13 @@
-const CACHE='gcal-test-58d47a9fd0381f29';
+const CACHE='gcal-test-e8f46497c06b76fb';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","assets/member-CfTom3lK.js","assets/announcement-manager-DPz2oCm0.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-BNe3XZtu.js","assets/event-dialog-BmDZ_z0i.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-BgFmPD1q.js","assets/main-CzCHT8kP.js","assets/push-BZDlJsu3.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-DSSJpEng.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-jQ90UkHl.css","assets/member-Du-xDgE5.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","assets/member-C2YPGyYX.js","assets/announcement-manager-Du0LKsdA.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-St66MxnI.js","assets/event-dialog-jnjbRyOE.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-C9qE0y5F.js","assets/main-DsPIDNbh.js","assets/push-BVM3cMnD.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-DSSJpEng.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-jQ90UkHl.css","assets/member-DJr93L_u.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET'||!FILES.includes(event.request.url))return;
   event.respondWith(caches.open(CACHE).then(cache=>cache.match(event.request).then(cached=>cached||fetch(event.request))));
 });
-const validRoomId=id=>typeof id==='string'&&(/^[a-f0-9-]{36}$/.test(id)||/^system:members:(?:all|game:[a-f0-9-]{36}:(?:playing|unplayed))$/.test(id));
+const validRoomId=id=>typeof id==='string'&&(/^[a-f0-9-]{36}$/.test(id)||/^system:members:(?:all|game:(?:G[2-9A-HJKMNP-Z]{8}|[a-f0-9-]{36}):(?:playing|unplayed))$/.test(id));
 self.addEventListener('push',event=>{
   event.waitUntil((async()=>{
     let data;try{data=event.data?.json();}catch{return;}
