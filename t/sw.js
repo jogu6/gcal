@@ -1,6 +1,6 @@
-const CACHE='gcal-test-b718cdecf67c6138';
+const CACHE='gcal-test-0899104970c31afc';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","assets/member-Cwp7gCaG.js","assets/announcement-manager-TbWFcP1_.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-BT9Ddxfs.js","assets/event-dialog-BZDmbnvx.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-Cf2jHNVg.js","assets/main-t6AMsr1M.js","assets/push-u0Oai-3j.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-BUvFxKVp.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-CRrpG0wX.css","assets/member-PyGTiLtR.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","assets/member-db6EMMBG.js","assets/announcement-manager-sScw_bfb.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-CA5995fI.js","assets/event-dialog-CV3Nu82P.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-CjS0Q1UF.js","assets/main-BVFiSITS.js","assets/push-6fbdBcEw.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-BUvFxKVp.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-0YpBmvkM.css","assets/member-PyGTiLtR.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
@@ -11,7 +11,7 @@ const validRoomId=id=>typeof id==='string'&&(/^[a-f0-9-]{36}$/.test(id)||/^syste
 self.addEventListener('push',event=>{
   event.waitUntil((async()=>{
     let data;try{data=event.data?.json();}catch{return;}
-    if(!data||!['alarm','event-change','event-response','test','chat','board'].includes(data.kind)||!Number.isFinite(data.expiresMs)||data.expiresMs<=Date.now())return;
+    if(!data||!['alarm','event-created','event-emergency','event-change','event-response','test','chat','board'].includes(data.kind)||!Number.isFinite(data.expiresMs)||data.expiresMs<=Date.now())return;
     const eventId=typeof data.eventId==='string'&&/^[a-f0-9-]{36}$/.test(data.eventId)?data.eventId:null;
     const roomId=['chat','board'].includes(data.kind)&&validRoomId(data.roomId)?data.roomId:null;
     const postId=roomId&&typeof data.postId==='string'&&/^[a-f0-9-]{36}$/.test(data.postId)?data.postId:null;
@@ -20,8 +20,8 @@ self.addEventListener('push',event=>{
     const eventTitle=typeof data.eventTitle==='string'&&data.eventTitle.trim()?data.eventTitle.trim().slice(0,100):'予定';
     const attendance=typeof data.attendance==='string'&&data.attendance.trim()?data.attendance.trim().slice(0,100):'回答待ち';
     const dateText=(typeof data.dateText==='string'&&/^\d{4}\/\d{2}\/\d{2}(?: \d{2}:\d{2})?$/.test(data.dateText))||data.dateText==='日時未指定'?data.dateText:'日時未指定';
-    const reason=data.kind==='alarm'?'開催時刻が近づいています':data.kind==='event-response'?'参加表明が変更されました':'内容が変更されました';
-    const body=data.kind==='test'?'通知のテストです。':data.kind==='chat'||data.kind==='board'?`「${roomTitle}」：${postText}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
+    const reason=data.kind==='alarm'?'開催時刻が近づいています':data.kind==='event-response'?'参加表明が変更されました':data.kind==='event-created'?'新しいイベントが登録されました':data.kind==='event-emergency'?'緊急イベント発生！ご参加をお待ちしています。':'内容が変更されました';
+    const body=data.kind==='test'?'通知のテストです。':data.kind==='chat'||data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
     await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat'}});
   })());
 });
