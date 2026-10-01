@@ -1,10 +1,19 @@
-const CACHE='gcal-test-782aa42519c7561c';
+const CACHE='gcal-test-f9858ca9bfc962bf';
+const VERSION='f9858ca9bfc962bf';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","assets/member-BKQ5RrqS.js","assets/announcement-manager-Lpus_v6t.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-GWcLPsjx.js","assets/event-dialog-CdVGG0Bh.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-B9PNqv9e.js","assets/main-j61pxhy7.js","assets/push-C74HmImh.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-SM7EhCrW.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-CKqCl-jh.css","assets/member-Q3R9iPo7.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","assets/member-BSE5Wth0.js","assets/announcement-manager-DE-A5zxc.js","assets/data-by-emoji-0GIA0LCY.js","assets/drafts-B-3qngoJ.js","assets/event-dialog-BlpfMDKx.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-DpBotkoo.js","assets/main-D4z3OmcN.js","assets/push-oPKV3Q25.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/event-dialog-SM7EhCrW.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-CKqCl-jh.css","assets/member-Q3R9iPo7.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET'||!FILES.includes(event.request.url))return;
+  if(event.request.mode==='navigate'){
+    event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{
+      if(response.ok){const copy=response.clone();void caches.open(CACHE).then(cache=>cache.put(event.request,copy));}
+      return response;
+    }).catch(()=>caches.match(event.request)));
+    return;
+  }
   event.respondWith(caches.open(CACHE).then(cache=>cache.match(event.request).then(cached=>cached||fetch(event.request))));
 });
 const validRoomId=id=>typeof id==='string'&&(/^[a-f0-9-]{36}$/.test(id)||/^system:members:(?:all|game:(?:G[2-9A-HJKMNP-Z]{8}|[a-f0-9-]{36}):(?:playing|unplayed))$/.test(id));
