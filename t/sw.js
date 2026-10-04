@@ -1,7 +1,7 @@
-const CACHE='gcal-test-891d945bf3865fec';
-const VERSION='891d945bf3865fec';
+const CACHE='gcal-test-eb1d1f32a412e4d4';
+const VERSION='eb1d1f32a412e4d4';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","assets/member-Dj_udnGa.js","assets/announcement-manager-D60e2Q9A.js","assets/api-SoTQUHII.js","assets/data-by-emoji-0GIA0LCY.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-DgpaePaM.js","assets/main-h0vj2gXt.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/announcement-manager-BCuhVzQI.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-CU1K7GmW.css","assets/member-Cr6aLVYI.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","assets/member-CoDvFIzb.js","assets/announcement-manager-Cpxs0K5-.js","assets/api-SoTQUHII.js","assets/data-by-emoji-0GIA0LCY.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-DgpaePaM.js","assets/main-CnuTZBeO.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/announcement-manager-BCuhVzQI.css","assets/image-convert-heic.worker-jmpIFXYy.js","assets/image-convert.worker-DBl1V2ZH.js","assets/main-CU1K7GmW.css","assets/member-Cr6aLVYI.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
