@@ -1,7 +1,7 @@
-const CACHE='gcal-test-663580b8798b86ed';
-const VERSION='663580b8798b86ed';
+const CACHE='gcal-test-1d70839077be6b74';
+const VERSION='1d70839077be6b74';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","assets/member-Bl5hYyQY.js","assets/announcement-manager-D879I_Mx.js","assets/api-DguVcUWy.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-12-kyyl-.js","assets/first-login-B8SV4nkg.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-DyJZy4og.js","assets/main-dOyjzDIK.js","assets/preload-helper-uBIymjUX.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Py7W-PTH.js","assets/image-convert.worker-Cs6kX3fU.js","assets/main-D6Jt--wG.css","assets/member-OPSvCyQh.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","assets/member-Bhf8J47J.js","assets/announcement-manager-DJIH6HLg.js","assets/api-DguVcUWy.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-12-kyyl-.js","assets/first-login-C8xz4FII.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-DyJZy4og.js","assets/main-CYTyihDN.js","assets/preload-helper-uBIymjUX.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Py7W-PTH.js","assets/image-convert.worker-Cs6kX3fU.js","assets/main-DJp5mVW3.css","assets/member-OPSvCyQh.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
