@@ -1,5 +1,5 @@
-const CACHE='gcal-test-72a48f66009badec';
-const VERSION='72a48f66009badec';
+const CACHE='gcal-test-e4405a8778832209';
+const VERSION='e4405a8778832209';
 const BASE=new URL('./',self.location.href);
 const FILES=["./","index.html","assets/member-LoIYagoR.js","assets/announcement-manager-T5tloVgw.js","assets/api-DguVcUWy.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-12-kyyl-.js","assets/first-login-CudtpAdP.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-DyJZy4og.js","assets/main-BymXzWs_.js","assets/preload-helper-uBIymjUX.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Py7W-PTH.js","assets/image-convert.worker-Cs6kX3fU.js","assets/main-D43vXM0X.css","assets/member-Bs7qCWYV.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
@@ -20,7 +20,7 @@ const validRoomId=id=>typeof id==='string'&&(/^[a-f0-9-]{36}$/.test(id)||/^syste
 self.addEventListener('push',event=>{
   event.waitUntil((async()=>{
     let data;try{data=event.data?.json();}catch{return;}
-    if(!data||!['alarm','event-created','event-emergency','event-change','event-response','test','chat','board'].includes(data.kind)||!Number.isFinite(data.expiresMs)||data.expiresMs<=Date.now())return;
+    if(!data||!['alarm','event-created','event-emergency','event-change','event-response','test','chat','board','announcement'].includes(data.kind)||!Number.isFinite(data.expiresMs)||data.expiresMs<=Date.now())return;
     const eventId=typeof data.eventId==='string'&&/^[a-f0-9-]{36}$/.test(data.eventId)?data.eventId:null;
     const roomId=['chat','board'].includes(data.kind)&&validRoomId(data.roomId)?data.roomId:null;
     const postId=roomId&&typeof data.postId==='string'&&/^[a-f0-9-]{36}$/.test(data.postId)?data.postId:null;
@@ -30,13 +30,17 @@ self.addEventListener('push',event=>{
     const attendance=typeof data.attendance==='string'&&data.attendance.trim()?data.attendance.trim().slice(0,100):'回答待ち';
     const dateText=(typeof data.dateText==='string'&&/^\d{4}\/\d{2}\/\d{2}(?: \d{2}:\d{2})?$/.test(data.dateText))||data.dateText==='日時未指定'?data.dateText:'日時未指定';
     const reason=data.kind==='alarm'?'開催時刻が近づいています':data.kind==='event-response'?'参加表明が変更されました':data.kind==='event-created'?'新しいイベントが登録されました':data.kind==='event-emergency'?'緊急イベント発生！ご参加をお待ちしています。':'内容が変更されました';
-    const body=data.kind==='test'?'通知のテストです。':data.kind==='chat'||data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
-    await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat'}});
+    const announcementId=data.kind==='announcement'&&typeof data.announcementId==='string'&&/^[a-f0-9-]{36}$/.test(data.announcementId)?data.announcementId:null;
+    if(data.kind==='announcement'&&!announcementId)return;
+    const announcementTitle=typeof data.announcementTitle==='string'&&data.announcementTitle.trim()?data.announcementTitle.trim().slice(0,100):'新しいお知らせ';
+    const body=data.kind==='announcement'?`お知らせ：「${announcementTitle}」`:data.kind==='test'?'通知のテストです。':data.kind==='chat'||data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
+    await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat',announcementId}});
   })());
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();event.waitUntil((async()=>{
     const url=new URL(self.registration.scope),id=event.notification.data?.eventId;if(typeof id==='string'&&/^[a-f0-9-]{36}$/.test(id))url.hash='alarm='+id;
+    if(typeof event.notification.data?.announcementId==='string'&&/^[a-f0-9-]{36}$/.test(event.notification.data.announcementId))url.searchParams.set('view','announcements');
     const roomId=event.notification.data?.roomId,roomKind=event.notification.data?.roomKind==='board'?'board':'chat',postId=event.notification.data?.postId;if(validRoomId(roomId))url.hash=roomKind+'='+roomId+(typeof postId==='string'&&/^[a-f0-9-]{36}$/.test(postId)?'&post='+postId:'');
     const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     const target=windows.find(client=>client.url===url.href)||windows.find(client=>client.url.startsWith(self.registration.scope));
