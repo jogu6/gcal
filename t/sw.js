@@ -1,5 +1,5 @@
-const CACHE='gcal-test-5ad8a4788af7494f';
-const VERSION='5ad8a4788af7494f';
+const CACHE='gcal-test-a1353d8767a4576a';
+const VERSION='a1353d8767a4576a';
 const BASE=new URL('./',self.location.href);
 const FILES=["./","index.html","assets/member-BwHOLZek.js","assets/announcement-manager-CoqgJqdn.js","assets/api-VmomuA5z.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-12-kyyl-.js","assets/first-login-BQeK4sEu.js","assets/heic-decode-Q4ck0edy.js","assets/local-events-oUyyCcMT.js","assets/main-COZI_J9v.js","assets/preload-helper-uBIymjUX.js","assets/rolldown-runtime-Dd_uD5pT.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Dj967qDY.js","assets/image-convert.worker-Dedzj_3y.js","assets/main-CKqlxJig.css","assets/member-IHzf9CvD.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
