@@ -1,5 +1,5 @@
-const CACHE='gcal-test-e1add27534a946cc';
-const VERSION='e1add27534a946cc';
+const CACHE='gcal-test-18922bc3b7bfe5b6';
+const VERSION='18922bc3b7bfe5b6';
 const BASE=new URL('./',self.location.href);
 const FILES=["./","index.html","auth.html","assets/auth-D_U8hiCd.js","assets/member-BNoc3qUS.js","assets/announcement-manager-Bh4bqmSt.js","assets/auth-desktop-Cu4Vvc7T.js","assets/base-CHNBJlmv.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode--_UayFw0.js","assets/event-dialog-DndAdWHR.js","assets/first-login-C7Uo-Z1S.js","assets/heic-decode-CZgHg2ZZ.js","assets/layout-Bhap6mDF.js","assets/local-events-_dFlq0ZS.js","assets/main-CwC8Oibi.js","assets/push-Bke3PMaU.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-DiR4I93q.css","assets/auth-desktop-C86aNcEp.css","assets/base-4Sq-EotA.css","assets/event-dialog-yKx4f2yB.css","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Dj967qDY.js","assets/image-convert.worker-Dedzj_3y.js","assets/layout-D0vPPJ8i.css","assets/main-e9bM_x0O.css","assets/member-CSpfFJJN.css","assets/push-BMGjW-Xd.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
@@ -34,7 +34,7 @@ self.addEventListener('push',event=>{
     const announcementId=data.kind==='announcement'&&typeof data.announcementId==='string'&&/^[a-f0-9-]{36}$/.test(data.announcementId)?data.announcementId:null;
     if(data.kind==='announcement'&&!announcementId)return;
     const announcementTitle=typeof data.announcementTitle==='string'&&data.announcementTitle.trim()?data.announcementTitle.trim().slice(0,100):'新しいお知らせ';
-    const body=data.kind==='announcement'?`お知らせ：「${announcementTitle}」`:data.kind==='test'?'通知のテストです。':data.kind==='chat'?`${authorName}\n${postText}`:data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
+    const body=data.kind==='announcement'?`お知らせ：「${announcementTitle}」`:data.kind==='test'?'通知のテストです。':data.kind==='chat'?`${authorName}\n${postText}\n「${roomTitle}」`:data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
     await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat',announcementId}});
   })());
 });
