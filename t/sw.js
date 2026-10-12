@@ -1,7 +1,7 @@
-const CACHE='gcal-test-53e1d07a95c9e428';
-const VERSION='53e1d07a95c9e428';
+const CACHE='gcal-test-e1add27534a946cc';
+const VERSION='e1add27534a946cc';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","auth.html","assets/auth-tANNkbbn.js","assets/member-CR7KlBun.js","assets/announcement-manager-Dwn0LYd_.js","assets/auth-desktop-Cu4Vvc7T.js","assets/base-CHNBJlmv.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode--_UayFw0.js","assets/event-dialog-1sYMGNL-.js","assets/first-login-C7Uo-Z1S.js","assets/heic-decode-CZgHg2ZZ.js","assets/layout-CyE6H0Zp.js","assets/local-events-_dFlq0ZS.js","assets/main-SqwqsTol.js","assets/push-Bke3PMaU.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-DiR4I93q.css","assets/auth-desktop-C86aNcEp.css","assets/base-4Sq-EotA.css","assets/event-dialog-yKx4f2yB.css","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Dj967qDY.js","assets/image-convert.worker-Dedzj_3y.js","assets/layout-D0vPPJ8i.css","assets/main-e9bM_x0O.css","assets/member-CSpfFJJN.css","assets/push-BMGjW-Xd.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","auth.html","assets/auth-D_U8hiCd.js","assets/member-BNoc3qUS.js","assets/announcement-manager-Bh4bqmSt.js","assets/auth-desktop-Cu4Vvc7T.js","assets/base-CHNBJlmv.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode--_UayFw0.js","assets/event-dialog-DndAdWHR.js","assets/first-login-C7Uo-Z1S.js","assets/heic-decode-CZgHg2ZZ.js","assets/layout-Bhap6mDF.js","assets/local-events-_dFlq0ZS.js","assets/main-CwC8Oibi.js","assets/push-Bke3PMaU.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-DiR4I93q.css","assets/auth-desktop-C86aNcEp.css","assets/base-4Sq-EotA.css","assets/event-dialog-yKx4f2yB.css","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Dj967qDY.js","assets/image-convert.worker-Dedzj_3y.js","assets/layout-D0vPPJ8i.css","assets/main-e9bM_x0O.css","assets/member-CSpfFJJN.css","assets/push-BMGjW-Xd.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
@@ -26,6 +26,7 @@ self.addEventListener('push',event=>{
     const postId=roomId&&typeof data.postId==='string'&&/^[a-f0-9-]{36}$/.test(data.postId)?data.postId:null;
     const roomTitle=typeof data.roomTitle==='string'&&data.roomTitle.trim()?data.roomTitle.trim().slice(0,100):data.kind==='chat'?'チャット':'掲示板';
     const postText=typeof data.postText==='string'&&data.postText.trim()?data.postText.trim().slice(0,120):'新しい投稿があります';
+    const authorName=typeof data.authorName==='string'&&data.authorName.trim()?data.authorName.trim().slice(0,100):'発言者不明';
     const eventTitle=typeof data.eventTitle==='string'&&data.eventTitle.trim()?data.eventTitle.trim().slice(0,100):'予定';
     const attendance=typeof data.attendance==='string'&&data.attendance.trim()?data.attendance.trim().slice(0,100):'回答待ち';
     const dateText=(typeof data.dateText==='string'&&/^\d{4}\/\d{2}\/\d{2}(?: \d{2}:\d{2})?$/.test(data.dateText))||data.dateText==='日時未指定'?data.dateText:'日時未指定';
@@ -33,7 +34,7 @@ self.addEventListener('push',event=>{
     const announcementId=data.kind==='announcement'&&typeof data.announcementId==='string'&&/^[a-f0-9-]{36}$/.test(data.announcementId)?data.announcementId:null;
     if(data.kind==='announcement'&&!announcementId)return;
     const announcementTitle=typeof data.announcementTitle==='string'&&data.announcementTitle.trim()?data.announcementTitle.trim().slice(0,100):'新しいお知らせ';
-    const body=data.kind==='announcement'?`お知らせ：「${announcementTitle}」`:data.kind==='test'?'通知のテストです。':data.kind==='chat'||data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
+    const body=data.kind==='announcement'?`お知らせ：「${announcementTitle}」`:data.kind==='test'?'通知のテストです。':data.kind==='chat'?`${authorName}\n${postText}`:data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
     await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat',announcementId}});
   })());
 });
