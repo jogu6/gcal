@@ -1,7 +1,7 @@
-const CACHE='gcal-test-19a8f17e270b2093';
-const VERSION='19a8f17e270b2093';
+const CACHE='gcal-test-be1f23f6ba1d2d50';
+const VERSION='be1f23f6ba1d2d50';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","auth.html","assets/auth-Bw3Z6KCq.js","assets/member-LMQTdCnb.js","assets/announcement-manager-Pd1-R3Kj.js","assets/auth-desktop-Bh_fPWWy.js","assets/base-Qp_SaDcd.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-x5lgiOkW.js","assets/event-dialog-aExUonw3.js","assets/first-login-Du9wEwBH.js","assets/heic-decode-CzbU9_iH.js","assets/layout-DASvHYA6.js","assets/local-events-D4llE8kr.js","assets/main-0JVhYMar.js","assets/push-Bz7x2GiV.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-DiR4I93q.css","assets/auth-desktop-C86aNcEp.css","assets/base-4Sq-EotA.css","assets/event-dialog-yKx4f2yB.css","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Dj967qDY.js","assets/image-convert.worker-Dedzj_3y.js","assets/layout-D0vPPJ8i.css","assets/main-uvhA8VeL.css","assets/member-CSpfFJJN.css","assets/push-BMGjW-Xd.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","auth.html","assets/auth-Bw3Z6KCq.js","assets/member-px40N4nk.js","assets/announcement-manager-DUn3Oo-7.js","assets/auth-desktop-Bh_fPWWy.js","assets/base-Qp_SaDcd.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-x5lgiOkW.js","assets/event-dialog-aExUonw3.js","assets/first-login-Du9wEwBH.js","assets/heic-decode-CzbU9_iH.js","assets/layout-DASvHYA6.js","assets/local-events-D4llE8kr.js","assets/main-BEA2O_Sz.js","assets/push-Bz7x2GiV.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-DiR4I93q.css","assets/auth-desktop-C86aNcEp.css","assets/base-4Sq-EotA.css","assets/event-dialog-yKx4f2yB.css","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Dj967qDY.js","assets/image-convert.worker-Dedzj_3y.js","assets/layout-D0vPPJ8i.css","assets/main-uvhA8VeL.css","assets/member-CSpfFJJN.css","assets/push-BMGjW-Xd.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
@@ -44,13 +44,18 @@ self.addEventListener('notificationclick',event=>{
     if(typeof event.notification.data?.announcementId==='string'&&/^[a-f0-9-]{36}$/.test(event.notification.data.announcementId))url.searchParams.set('view','announcements');
     const roomId=event.notification.data?.roomId,roomKind=event.notification.data?.roomKind==='board'?'board':'chat',postId=event.notification.data?.postId;if(validRoomId(roomId))url.hash=roomKind+'='+roomId+(typeof postId==='string'&&/^[a-f0-9-]{36}$/.test(postId)?'&post='+postId:'');
     const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    const target=windows.find(client=>client.url===url.href)||windows.find(client=>client.url.startsWith(self.registration.scope));
+    const appWindows=windows.filter(client=>client.url.startsWith(self.registration.scope));
+    const target=appWindows.find(client=>client.url===url.href)||appWindows.find(client=>client.focused)||appWindows.find(client=>client.visibilityState==='visible')||appWindows[0];
     if(target){
-      // A browser can reject navigate() while still allowing the existing tab to focus.
-      let navigated=false;
-      try{if(target.url!==url.href){await target.navigate(url.href);navigated=true;}}catch{/* Keep the existing app tab. */}
-      if(!navigated)target.postMessage?.({kind:'gcal-push-target',eventId:id,roomId,postId,roomKind});
-      await target.focus();
-    }else await self.clients.openWindow(url.href);
+      // Keep the existing app even if a browser cannot navigate its window client.
+      let destination=target;
+      try{if(target.url!==url.href){const navigated=await target.navigate(url.href);if(navigated&&typeof navigated.focus==='function')destination=navigated;}}catch{/* Use the in-page route below. */}
+      if(destination===target)target.postMessage?.({kind:'gcal-push-target',eventId:id,roomId,postId,roomKind,announcementId:event.notification.data?.announcementId});
+      await destination.focus();
+    }else{
+      const opened=await self.clients.openWindow(url.href);
+      // Some installed web apps launch at their root even when openWindow receives a deep link.
+      if(opened&&opened.url!==url.href){try{const navigated=await opened.navigate(url.href);if(!navigated)opened.postMessage?.({kind:'gcal-push-target',eventId:id,roomId,postId,roomKind,announcementId:event.notification.data?.announcementId});}catch{opened.postMessage?.({kind:'gcal-push-target',eventId:id,roomId,postId,roomKind,announcementId:event.notification.data?.announcementId});}}
+    }
   })());
 });
