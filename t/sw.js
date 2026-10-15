@@ -1,7 +1,7 @@
-const CACHE='gcal-test-61eb08f6fbdcf085';
-const VERSION='61eb08f6fbdcf085';
+const CACHE='gcal-test-facbbd7957e739a7';
+const VERSION='facbbd7957e739a7';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","auth.html","assets/auth-DCUUHGFM.js","assets/member-fw7VgVPv.js","assets/announcement-manager-CZvW6u1p.js","assets/auth-desktop-CstARXsW.js","assets/base-BcJqV40M.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-CVNyGL9n.js","assets/event-dialog-Xw9_yKgH.js","assets/first-login-DiJKzrWx.js","assets/heic-decode-Bwxd_m5r.js","assets/layout-CFxMfmTG.js","assets/local-events-B8-nTsf5.js","assets/main-CYyYMoy9.js","assets/push-Dubwu5hB.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-DiR4I93q.css","assets/auth-desktop-C86aNcEp.css","assets/base-4Sq-EotA.css","assets/event-dialog-C0D_2abe.css","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-Dj967qDY.js","assets/image-convert.worker-Dedzj_3y.js","assets/layout-D0vPPJ8i.css","assets/main-BagA6Y-R.css","assets/member-CSpfFJJN.css","assets/push-BMGjW-Xd.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","auth.html","assets/auth-DTUY6dVA.js","assets/member-QUz2v6ph.js","assets/announcement-manager-C5bOASTm.js","assets/auth-desktop-DB9n7NUA.js","assets/base-Cqwm2RR5.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-CKfvMAs8.js","assets/event-dialog-BOad_ncq.js","assets/first-login-CzxUo8fO.js","assets/heic-decode-BaJ3jvt4.js","assets/layout-D8hPjZaY.js","assets/local-events-CJkSmZlL.js","assets/main-TfafOFFS.js","assets/push-CY5rxGY6.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-DTXDgFD9.css","assets/auth-desktop-C86aNcEp.css","assets/base-D9o1wm6_.css","assets/event-dialog-vTQl-K22.css","assets/first-login-CO3vfOqx.css","assets/image-convert-heic.worker-DtXFbofO.js","assets/image-convert.worker-Dedzj_3y.js","assets/layout-Bnqkn3iN.css","assets/main-DxIB2VvD.css","assets/member-CSpfFJJN.css","assets/push-BMGjW-Xd.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
@@ -34,8 +34,9 @@ self.addEventListener('push',event=>{
     const announcementId=data.kind==='announcement'&&typeof data.announcementId==='string'&&/^[a-f0-9-]{36}$/.test(data.announcementId)?data.announcementId:null;
     if(data.kind==='announcement'&&!announcementId)return;
     const announcementTitle=typeof data.announcementTitle==='string'&&data.announcementTitle.trim()?data.announcementTitle.trim().slice(0,100):'新しいお知らせ';
+    const occurredMs=Number.isSafeInteger(data.occurredMs)&&data.occurredMs>=0?data.occurredMs:Date.now();
     const body=data.kind==='announcement'?`お知らせ：「${announcementTitle}」`:data.kind==='test'?'通知のテストです。':data.kind==='chat'?`${authorName}\n${postText}\n「${roomTitle}」`:data.kind==='board'?`「${roomTitle}」：${postText}`:data.kind==='event-emergency'?`${reason}｜${dateText}｜「${eventTitle}」｜${attendance}`:`${attendance}｜${dateText}｜「${eventTitle}」｜${reason}`;
-    await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat',announcementId}});
+    await self.registration.showNotification("くまたんグループ",{body,icon:new URL('b/180.png',self.registration.scope).href,tag:typeof data.tag==='string'?data.tag:'gcal',renotify:data.kind==='test',timestamp:occurredMs,data:{eventId,roomId,postId,roomKind:data.kind==='board'?'board':'chat',announcementId,occurredMs}});
   })());
 });
 self.addEventListener('notificationclick',event=>{
@@ -57,7 +58,18 @@ self.addEventListener('notificationclick',event=>{
     const pwaIndex=standalone.findIndex(Boolean);
     const preferred=pwaIndex<0?appWindows:appWindows.filter((_,index)=>standalone[index]);
     const target=preferred.find(client=>client.url===url.href)||preferred.find(client=>client.focused)||preferred.find(client=>client.visibilityState==='visible')||preferred[0];
+    const message={kind:'gcal-push-target',eventId:id,roomId,postId,roomKind,announcementId:event.notification.data?.announcementId};
+    const routeInPage=client=>typeof MessageChannel!=='function'?Promise.resolve(false):new Promise(resolve=>{
+      const channel=new MessageChannel();let done=false;
+      const finish=value=>{if(done)return;done=true;clearTimeout(timer);channel.port1.close();resolve(value);};
+      const timer=setTimeout(()=>finish(false),300);
+      channel.port1.onmessage=reply=>finish(reply.data?.kind==='gcal-push-target-accepted');
+      try{client.postMessage(message,[channel.port2]);}catch{finish(false);}
+    });
     if(target){
+      // A running application can route without discarding its authenticated
+      // session and fetched data. Older/unready pages fall back to navigation.
+      if(await routeInPage(target)){await target.focus();return;}
       // Keep the existing app even if a browser cannot navigate its window client.
       let destination=target;
       try{if(target.url!==url.href){const navigated=await target.navigate(url.href);if(navigated&&typeof navigated.focus==='function')destination=navigated;}}catch{/* Use the in-page route below. */}
