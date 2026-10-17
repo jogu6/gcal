@@ -1,7 +1,7 @@
-const CACHE='gcal-test-4b8ec7b904b728e4';
-const VERSION='4b8ec7b904b728e4';
+const CACHE='gcal-test-5a848d350bce3fc4';
+const VERSION='5a848d350bce3fc4';
 const BASE=new URL('./',self.location.href);
-const FILES=["./","index.html","auth.html","assets/auth-KgixvJ3M.js","assets/member-CKw1YPOB.js","assets/registrationGuide-D4vrYX4M.js","assets/announcement-manager-CVLeLUgE.js","assets/app-update-Dv5QMKso.js","assets/auth-credentials-P8MuYac-.js","assets/auth-desktop-aky-pm9f.js","assets/base-CK1u7qQV.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-Dx85T1id.js","assets/event-dialog-qjPc_M52.js","assets/first-login-4geqwJ4N.js","assets/heic-decode-DrwvCkKE.js","assets/layout-Cj94C7rp.js","assets/local-events-CWe7dX7X.js","assets/main-DMqqoIsE.js","assets/push-DUuRgNAz.js","assets/restart-availability-ByhM8BL_.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-Jzbf-Kgj.css","assets/auth-credentials-CCDQ3mL0.css","assets/auth-desktop-BxIJewfM.css","assets/base-pAM32ZNq.css","assets/event-dialog-CCHvXVxp.css","assets/first-login-CJIB8FoO.css","assets/image-convert-heic.worker-2ZUNuuRt.js","assets/image-convert.worker-CC4AqGbp.js","assets/layout-v9Dac7jd.css","assets/main-Ndp_KZFF.css","assets/member-CKJFf6Pk.css","assets/push-Db7n0SLi.css","assets/registrationGuide-D8jG6RPm.css","assets/restart-availability-DWwGtzCV.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
+const FILES=["./","index.html","auth.html","assets/auth-CngQ7GSl.js","assets/member-UkkyZNyQ.js","assets/registrationGuide-D4vrYX4M.js","assets/announcement-manager-BtQ-NEeC.js","assets/app-update-CVLFXlCd.js","assets/auth-credentials-D4Dw9-hS.js","assets/auth-desktop-Ccp6wdug.js","assets/base-CK1u7qQV.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-Cw3XJFxg.js","assets/event-dialog-CoKTmbPo.js","assets/first-login-BL6D5p0r.js","assets/heic-decode-C0XiE2tU.js","assets/layout-Dp3cRYEy.js","assets/local-events-C1iRf25s.js","assets/main-CQ-JOSHN.js","assets/push-DOAu8IOy.js","assets/restart-availability-CsnToxsr.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-Jzbf-Kgj.css","assets/auth-credentials-CCDQ3mL0.css","assets/auth-desktop-BxIJewfM.css","assets/base-pAM32ZNq.css","assets/event-dialog-CCHvXVxp.css","assets/first-login-CJIB8FoO.css","assets/image-convert-heic.worker-2ZUNuuRt.js","assets/image-convert.worker-CC4AqGbp.js","assets/layout-v9Dac7jd.css","assets/main--xL2_hSq.css","assets/member-CKJFf6Pk.css","assets/push-Db7n0SLi.css","assets/registrationGuide-D8jG6RPm.css","assets/restart-availability-DWwGtzCV.css","b/180.png","b/32.png","b/512.png","b/logo.png"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
@@ -69,7 +69,8 @@ self.addEventListener('notificationclick',event=>{
     if(target){
       // A running application can route without discarding its authenticated
       // session and fetched data. Older/unready pages fall back to navigation.
-      if(await routeInPage(target)){await target.focus();return;}
+      const focus=target.focus().catch(()=>null);
+      if(await routeInPage(target)){await focus;return;}
       // Keep the existing app even if a browser cannot navigate its window client.
       let destination=target;
       try{if(target.url!==url.href){const navigated=await target.navigate(url.href);if(navigated&&typeof navigated.focus==='function')destination=navigated;}}catch{/* Use the in-page route below. */}
