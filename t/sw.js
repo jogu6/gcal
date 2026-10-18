@@ -1,17 +1,19 @@
-const CACHE='gcal-test-57c47c9027b497b1';
-const VERSION='57c47c9027b497b1';
+const CACHE='gcal-test-9b8e56c86738ffbc';
+const VERSION='9b8e56c86738ffbc';
 const BASE=new URL('./',self.location.href);
 const FILES=["./","index.html","auth.html","assets/auth-DtPFB9sz.js","assets/member-_DJNXWfK.js","assets/registrationGuide-DeCN7hZw.js","assets/announcement-manager-DFCtS95N.js","assets/app-update-1Vad5k5T.js","assets/auth-credentials-CiRl82z_.js","assets/auth-desktop-DDdD7Hvd.js","assets/base-D-ss_DBI.js","assets/data-by-emoji-0GIA0LCY.js","assets/encode-CqNzD3uD.js","assets/event-dialog-w0KZHR18.js","assets/first-login-C7O4498N.js","assets/heic-decode-k6RC6iwT.js","assets/layout-BcAK0cVY.js","assets/local-events-DIPXhxpm.js","assets/main-afTkYF6Y.js","assets/push-C9xpGELy.js","assets/reactions-DOwfpR05.js","assets/restart-availability-D1DK9yWi.js","assets/shared-input-history-hPQrf32u.js","assets/webp_enc-CoLu8DuH.js","assets/webp_enc_simd-p-n-r6dT.js","assets/auth-BA-3vqIR.css","assets/auth-credentials-CCDQ3mL0.css","assets/auth-desktop-BxIJewfM.css","assets/base--mlEa1zh.css","assets/event-dialog-mqCzSqfG.css","assets/first-login-CJIB8FoO.css","assets/image-convert-heic.worker-2ZUNuuRt.js","assets/image-convert.worker-CC4AqGbp.js","assets/layout-WG2sdSJ1.css","assets/main-Cc1dU-Qv.css","assets/member-CKJFf6Pk.css","assets/push-Db7n0SLi.css","assets/registrationGuide-D8jG6RPm.css","assets/restart-availability-DZX8nLiu.css","b/180.png","b/32.png","b/512.png","b/logo.png","icons/companion-copy.webp"].map(path=>new URL(path,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gcal-test-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.kind==='gcal-version')event.ports[0]?.postMessage({version:VERSION});});
 self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET'||!FILES.includes(event.request.url))return;
-  if(event.request.mode==='navigate'){
+  const navigation=event.request.mode==='navigate',url=new URL(event.request.url);if(navigation)url.search='';
+  const resource=navigation?url.href:event.request.url;
+  if(event.request.method!=='GET'||!FILES.includes(resource))return;
+  if(navigation){
     event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{
-      if(response.ok){const copy=response.clone();void caches.open(CACHE).then(cache=>cache.put(event.request,copy));}
+      if(response.ok){const copy=response.clone();void caches.open(CACHE).then(cache=>cache.put(resource,copy));}
       return response;
-    }).catch(()=>caches.match(event.request)));
+    }).catch(()=>caches.match(resource)));
     return;
   }
   event.respondWith(caches.open(CACHE).then(cache=>cache.match(event.request).then(cached=>cached||fetch(event.request))));
