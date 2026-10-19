@@ -1,1 +1,0 @@
-var e=null;window.addEventListener(`beforeinstallprompt`,t=>{t.preventDefault(),e=t,window.dispatchEvent(new Event(`gcal-install-available`))});var t=()=>matchMedia(`(display-mode: standalone)`).matches||navigator.standalone===!0,n=()=>!!e;async function r(){let t=e;return t?(e=null,await t.prompt(),(await t.userChoice).outcome===`accepted`):!1}export{r as n,t as r,n as t};
